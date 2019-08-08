@@ -90,8 +90,8 @@ class App extends Component {
       const slidingWindow = 60 * 1000; // one minute
 
       let timeSeries = this.state.lastTenTimestamps;
-      let recentEvents = timeSeries.filter(x => x > currentTime - slidingWindow);
-      const threshold = 2;
+      let recentEvents = timeSeries.filter(ts => ts > currentTime - slidingWindow);
+      const threshold = 4;
 
       if (recentEvents.length > threshold) {
         this.setState({statusTitle: 'There is a game currently ongoing!'});
