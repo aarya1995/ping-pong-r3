@@ -90,7 +90,7 @@ class App extends Component {
       const slidingWindow = 60 * 1000; // one minute
 
       let timeSeries = this.state.lastTenTimestamps;
-      let recentEvents = timeSeries.filter(ts => ts > currentTime - slidingWindow);
+      let recentEvents = timeSeries.filter(ts => ts*1000 > currentTime - slidingWindow);
       const threshold = 4;
 
       if (recentEvents.length > threshold) {
