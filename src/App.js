@@ -2,7 +2,19 @@ import React, { Component } from 'react';
 import './App.css';
 import firebase from 'firebase';
 
+const VIBRATION_TIME_STAMP_KEY_NAME = 'recorded_vibration_timestamp';
+
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      isTableInUse: false,
+      lastPlayedTimestamp: -1,
+      loading: true
+    };
+  }
+
   componentDidMount() {
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -18,17 +30,67 @@ class App extends Component {
     firebase.initializeApp(firebaseConfig);
 
     // fetch initial data in database and log to console
+    // -- no real reason why we are fetching 10 results. Maybe to do something with this data later?
     firebase.database().ref('/ping-pong-table/Usage/')
-        .orderByKey()
+        .limitToLast(10)
         .on('value', snapshot => {
-          console.log(snapshot.val());
+          this.parseFirebaseSnapshot(snapshot);
         });
   }
+
+  parseFirebaseSnapshot = async (snapshot) => {
+    this.setState({ loading: true });
+    // force the loading animation to occur longer - this is more aesthetic for UI purposes.
+    await this.sleep(2000);
+    const queryResult = snapshot.val();
+    let sortedTimeStamps = [];
+    Object.keys(queryResult).map((key) => {
+      sortedTimeStamps.push(queryResult[key][VIBRATION_TIME_STAMP_KEY_NAME]);
+    });
+    sortedTimeStamps = sortedTimeStamps.reverse();
+    console.log(sortedTimeStamps);
+    if (sortedTimeStamps.length >= 1) {
+      this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], loading: false });
+    }
+  };
+
+  sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+  formatTimeMessage = (timeElapsed) => {
+    const minutesElapsed = Math.floor((timeElapsed/1000)/60);
+    if (minutesElapsed >= 60) {
+      const hoursElapsed = Math.floor((timeElapsed/1000)/3600);
+      const minutesDiff = minutesElapsed - 60;
+      const hourPluralization = hoursElapsed > 1 ? 'hours' : 'hour';
+      const minutesPluralization = minutesDiff === 1 ? 'minute' : 'minutes';
+      return `${hoursElapsed} ${hourPluralization} and ${minutesDiff} ${minutesPluralization}`;
+    } else {
+      const minutesPluralization = minutesElapsed === 1 ? 'minute' : 'minutes';
+      return `${minutesElapsed} ${minutesPluralization}`;
+    }
+  };
+
+  checkTableStatus = () => {
+    if (this.state.loading) {
+      return (<h1 className="loading-text">Checking the ping pong database</h1>);
+    } else {
+      const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
+      const elapsedTime = Math.abs(new Date() - lastRecordedDate);
+      const minutesSinceLastGame = Math.floor((elapsedTime/1000)/60);
+      if (minutesSinceLastGame <= 1) { // May need some fine tuning
+        return (<h1>There is a game currently ongoing!</h1>);
+      } else {
+        return (<h1>The last game occurred { this.formatTimeMessage(elapsedTime) } ago.</h1>);
+      }
+    }
+  };
 
   render() {
     return (
         <div>
-          <h1 className="loading-text">Checking the ping pong database</h1>
+          {this.checkTableStatus()}
           <div className="spinner">
             <svg className="raquet" id="r-1">
               <ellipse className="front" cx="44" cy="50" rx="35" ry="50" />
