@@ -9,10 +9,16 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      statusTitle: '',
       isTableInUse: false,
       lastPlayedTimestamp: -1,
       loading: true
     };
+    this.interval = null;
+  }
+
+  componentWillMount() {
+    this.setState({statusTitle: 'Checking the ping pong database'});
   }
 
   componentDidMount() {
@@ -36,12 +42,13 @@ class App extends Component {
         .on('value', snapshot => {
           this.parseFirebaseSnapshot(snapshot);
         });
+    this.autoRefreshStatus();
   }
 
   parseFirebaseSnapshot = async (snapshot) => {
     this.setState({ loading: true });
     // force the loading animation to occur longer - this is more aesthetic for UI purposes.
-    await this.sleep(2000);
+    await this.sleep(1000);
     const queryResult = snapshot.val();
     let sortedTimeStamps = [];
     Object.keys(queryResult).map((key) => {
@@ -74,23 +81,34 @@ class App extends Component {
 
   checkTableStatus = () => {
     if (this.state.loading) {
-      return (<h1 className="loading-text">Checking the ping pong database</h1>);
+      this.setState({statusTitle: 'Checking the ping pong database'});
     } else {
       const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
       const elapsedTime = Math.abs(new Date() - lastRecordedDate);
       const minutesSinceLastGame = Math.floor((elapsedTime/1000)/60);
-      if (minutesSinceLastGame <= 1) { // May need some fine tuning
-        return (<h1>There is a game currently ongoing!</h1>);
+
+      if (minutesSinceLastGame < 1) { // May need some fine tuning
+        this.setState({statusTitle: 'There is a game currently ongoing!'});
       } else {
-        return (<h1>The last game occurred { this.formatTimeMessage(elapsedTime) } ago.</h1>);
+        this.setState({statusTitle: `The last game occurred ${this.formatTimeMessage(elapsedTime)} ago.`});
       }
     }
+  };
+
+  autoRefreshStatus = () => {
+    // First check, wait for firebase to init
+    setTimeout(() => { this.checkTableStatus() }, 1000 * 2);
+
+    // Refresh statusTitle every 10 sec
+    this.interval = setInterval(() => {
+      this.checkTableStatus();
+    }, 1000 * 10);
   };
 
   render() {
     return (
         <div>
-          {this.checkTableStatus()}
+          <h1 className={this.state.loading ? 'loading-text' : ''}>{this.state.statusTitle}</h1>
           <div className="spinner">
             <svg className="raquet" id="r-1">
               <ellipse className="front" cx="44" cy="50" rx="35" ry="50" />
