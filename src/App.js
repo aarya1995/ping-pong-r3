@@ -62,7 +62,7 @@ class App extends Component {
     const minutesElapsed = Math.floor((timeElapsed/1000)/60);
     if (minutesElapsed >= 60) {
       const hoursElapsed = Math.floor((timeElapsed/1000)/3600);
-      const minutesDiff = minutesElapsed - 60;
+      const minutesDiff = minutesElapsed % 60;
       const hourPluralization = hoursElapsed > 1 ? 'hours' : 'hour';
       const minutesPluralization = minutesDiff === 1 ? 'minute' : 'minutes';
       return `${hoursElapsed} ${hourPluralization} and ${minutesDiff} ${minutesPluralization}`;
