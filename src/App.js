@@ -12,6 +12,7 @@ class App extends Component {
       statusTitle: '',
       isTableInUse: false,
       lastPlayedTimestamp: -1,
+      lastTenTimestamps: [],
       loading: true
     };
     this.interval = null;
@@ -55,9 +56,8 @@ class App extends Component {
       sortedTimeStamps.push(queryResult[key][VIBRATION_TIME_STAMP_KEY_NAME]);
     });
     sortedTimeStamps = sortedTimeStamps.reverse();
-    console.log(sortedTimeStamps);
     if (sortedTimeStamps.length >= 1) {
-      this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], loading: false });
+      this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], lastTenTimestamps: sortedTimeStamps, loading: false });
     }
   };
 
@@ -84,11 +84,18 @@ class App extends Component {
       this.setState({statusTitle: 'Checking the ping pong database'});
     } else {
       const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
-      const elapsedTime = Math.abs(new Date() - lastRecordedDate);
-      const minutesSinceLastGame = Math.floor((elapsedTime/1000)/60);
+      const currentTime = Math.abs(new Date());
+      const slidingWindow = 60 * 1000; // one minute
 
-      if (minutesSinceLastGame < 1) { // May need some fine tuning
-        this.setState({statusTitle: 'There is a game currently ongoing!'});
+      let timeSeries = this.state.lastTenTimestamps;
+      let recentEvents = timeSeries.filter(ts => ts*1000 > currentTime - slidingWindow);
+
+      const elapsedTime = Math.abs(currentTime - timeSeries[9]*1000);
+      const threshold = 4;
+
+      console.log("recent events: ", recentEvents)
+      if (recentEvents.length > threshold) {
+        this.setState({statusTitle: 'There is a game currently ongoing!', isTableInUse: true});
       } else {
         this.setState({statusTitle: `The last game occurred ${this.formatTimeMessage(elapsedTime)} ago.`});
       }
