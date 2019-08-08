@@ -87,13 +87,13 @@ class App extends Component {
       const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
       const elapsedTime = Math.abs(new Date() - lastRecordedDate);
       const currentTime = Math.abs(new Date());
-      const slidingWindow = 60 * 1000 // one minute
+      const slidingWindow = 60 * 1000; // one minute
 
-      let timeSeries = this.state.lastTenTimestamps
-      let recentEvents = timeSeries.filter(x => x > currentTime - slidingWindow)
-      const threshold = 2
+      let timeSeries = this.state.lastTenTimestamps;
+      let recentEvents = timeSeries.filter(x => x > currentTime - slidingWindow);
+      const threshold = 2;
 
-      if recentEvents.length > threshold {
+      if (recentEvents.length > threshold) {
         this.setState({statusTitle: 'There is a game currently ongoing!'});
       } else {
         this.setState({statusTitle: `The last game occurred ${this.formatTimeMessage(elapsedTime)} ago.`});
