@@ -12,6 +12,7 @@ class App extends Component {
       statusTitle: '',
       isTableInUse: false,
       lastPlayedTimestamp: -1,
+      lastTenTimestamps: [],
       loading: true
     };
     this.interval = null;
@@ -57,7 +58,7 @@ class App extends Component {
     sortedTimeStamps = sortedTimeStamps.reverse();
     console.log(sortedTimeStamps);
     if (sortedTimeStamps.length >= 1) {
-      this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], loading: false });
+      this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], lastTenTimestamps: sortedTimeStamps, loading: false });
     }
   };
 
@@ -85,9 +86,14 @@ class App extends Component {
     } else {
       const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
       const elapsedTime = Math.abs(new Date() - lastRecordedDate);
-      const minutesSinceLastGame = Math.floor((elapsedTime/1000)/60);
+      const currentTime = Math.abs(new Date());
+      const slidingWindow = 60 * 1000 // one minute
 
-      if (minutesSinceLastGame < 1) { // May need some fine tuning
+      let timeSeries = this.state.lastTenTimestamps
+      let recentEvents = timeSeries.filter(x => x > currentTime - slidingWindow)
+      const threshold = 2
+
+      if recentEvents.length > threshold {
         this.setState({statusTitle: 'There is a game currently ongoing!'});
       } else {
         this.setState({statusTitle: `The last game occurred ${this.formatTimeMessage(elapsedTime)} ago.`});
