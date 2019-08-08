@@ -56,7 +56,6 @@ class App extends Component {
       sortedTimeStamps.push(queryResult[key][VIBRATION_TIME_STAMP_KEY_NAME]);
     });
     sortedTimeStamps = sortedTimeStamps.reverse();
-    console.log(sortedTimeStamps);
     if (sortedTimeStamps.length >= 1) {
       this.setState({ lastPlayedTimestamp: sortedTimeStamps[0], lastTenTimestamps: sortedTimeStamps, loading: false });
     }
@@ -94,6 +93,7 @@ class App extends Component {
       const elapsedTime = Math.abs(currentTime - timeSeries[9]*1000);
       const threshold = 4;
 
+      console.log("recent events: ", recentEvents)
       if (recentEvents.length > threshold) {
         this.setState({statusTitle: 'There is a game currently ongoing!', isTableInUse: true});
       } else {
