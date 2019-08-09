@@ -83,17 +83,16 @@ class App extends Component {
     if (this.state.loading) {
       this.setState({statusTitle: 'Checking the ping pong database'});
     } else {
-      const lastRecordedDate = new Date(this.state.lastPlayedTimestamp * 1000);
       const currentTime = Math.abs(new Date());
-      const slidingWindow = 60 * 1000; // one minute
+      const slidingWindow = 60 * 1000; // one minute in ms
 
       let timeSeries = this.state.lastTenTimestamps;
-      let recentEvents = timeSeries.filter(ts => ts*1000 > currentTime - slidingWindow);
+      let recentEvents = timeSeries.filter(timeStamp => timeStamp * 1000 > currentTime - slidingWindow);
 
       const elapsedTime = Math.abs(currentTime - timeSeries[9]*1000);
       const threshold = 4;
 
-      console.log("recent events: ", recentEvents)
+      console.log("recent events: ", recentEvents);
       if (recentEvents.length > threshold) {
         this.setState({statusTitle: 'There is a game currently ongoing!', isTableInUse: true});
       } else {
