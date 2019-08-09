@@ -95,8 +95,10 @@ class App extends Component {
       console.log("recent events: ", recentEvents);
       if (recentEvents.length > threshold) {
         this.setState({statusTitle: 'There is a game currently ongoing!', isTableInUse: true});
+        this.refs.spinner.classList.remove("stopped");
       } else {
         this.setState({statusTitle: `The last game occurred ${this.formatTimeMessage(elapsedTime)} ago.`});
+        this.refs.spinner.classList.add("stopped");
       }
     }
   };
@@ -115,7 +117,7 @@ class App extends Component {
     return (
         <div>
           <h1 className={this.state.loading ? 'loading-text' : ''}>{this.state.statusTitle}</h1>
-          <div className="spinner">
+          <div className="spinner" ref={"spinner"}>
             <svg className="raquet" id="r-1">
               <ellipse className="front" cx="44" cy="50" rx="35" ry="50" />
               <ellipse className="middle" cx="42" cy="50" rx="35" ry="50" />

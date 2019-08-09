@@ -3,6 +3,10 @@ body {
   margin: 0;
 }
 
+.ball, #r-2, #r-1, .shadow, #sor-2, #sr-2, #sr-1, #sb {
+  transition: 0.2s all;
+}
+
 h1 {
   display: block;
   width: 100%;
@@ -31,6 +35,21 @@ h1 {
 }
 .spinner .ball circle {
   fill: #FFF;
+}
+.spinner.stopped .ball, .spinner.stopped #r-2, .spinner.stopped #r-1, .spinner.stopped .shadow, .spinner.stopped #sor-2, .spinner.stopped #sr-2, .spinner.stopped #sr-1, .spinner.stopped #sb {
+  animation: none !important;
+}
+.spinner.stopped #r-1 {
+  transform: translate(70px, 0px) rotateZ(90deg) !important;
+}
+.spinner.stopped #r-2 {
+  transform: translate(70px, 0px) rotateZ(-90deg) !important;
+  left: 0 !important;
+  position: absolute;
+}
+.spinner.stopped .ball-container {
+  width: 40px;
+  transform: translate(130px, 0px) !important;
 }
 .spinner .raquet {
   transform-origin: bottom;
